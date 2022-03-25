@@ -40,6 +40,7 @@ class ProductProvider with ChangeNotifier {
     ),
   ];
 
+  // pointer to private _items
   List<Product> get items {
     return [..._items];
   }
@@ -49,21 +50,29 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = Uri.parse(urlFirebaseDatabase);
-    final response = await http.post(url, body: json.encode({
-      'title': product.title,
-      'description': product.description,
-      'imageUrl': product.imageUrl,
-      'price': product.price
-    }));
-    final newProduct = Product(
+    final url = Uri.parse(urlFirebaseDatabase); // paste your real database URL there
+    try {
+      final response = await http.post(url, body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+        }),
+      );
+      final newProduct = Product(
         id: json.decode(response.body)['name'],
         title: product.title,
         description: product.description,
-        price: product.price, imageUrl: product.imageUrl
-    );
-    _items.add(newProduct); // or _items.insert(0,newProduct);
-    notifyListeners();
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
+      _items.add(newProduct); // or _items.insert(0,newProduct);
+      notifyListeners();
+
+    } catch (error) {
+      print(error);
+      throw error;
+    }
   }
 
   void updateProduct(String id, Product newProduct) {
