@@ -5,7 +5,8 @@ import 'product.dart';
 import '../key.dart';
 
 class ProductProvider with ChangeNotifier {
-  final List<Product> _items = [
+  List<Product> _items = [
+    /*
     Product(
       id: 'p1',
       title: 'Red Shirt',
@@ -38,6 +39,7 @@ class ProductProvider with ChangeNotifier {
       imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     ),
+     */
   ];
 
   // pointer to private _items
@@ -70,7 +72,30 @@ class ProductProvider with ChangeNotifier {
       notifyListeners();
 
     } catch (error) {
-      print(error);
+      //print(error);
+      throw error;
+    }
+  }
+
+  Future<void> fetchData() async {
+    final url = Uri.parse(urlFirebaseDatabase);
+    try {
+      final response = await http.get(url);
+      //print(json.decode(response.body));
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProduct = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProduct.add(Product(
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          imageUrl: prodData['imageUrl'],
+        ));
+      });
+      _items = loadedProduct;
+      notifyListeners();
+    } catch (error) {
       throw error;
     }
   }
