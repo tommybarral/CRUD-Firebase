@@ -120,7 +120,17 @@ class ProductProvider with ChangeNotifier {
   }
 
   void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+    final url = Uri.parse(urlBasic + id + '.json');
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
+    http.delete(url).then((_) {
+      existingProduct = null;
+    }).catchError((_) {
+      _items.insert(existingProductIndex, existingProduct);
+    notifyListeners();
+    });
+    _items.removeAt(existingProductIndex);
     notifyListeners();
   }
 }
