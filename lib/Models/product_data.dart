@@ -100,11 +100,22 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final productIndex = _items.indexWhere((prod) => prod.id == id);
     if (productIndex >= 0) {
-      _items[productIndex] = newProduct;
-      notifyListeners();
+    final url = Uri.parse(urlBasic + id + '.json');
+    try {
+      await http.patch(url, body: json.encode({
+        'title': newProduct.title,
+        'description': newProduct.description,
+        'price': newProduct.price,
+        'imageUrl': newProduct.imageUrl,
+      }));
+        _items[productIndex] = newProduct;
+        notifyListeners();
+      } catch (error) {
+      throw (error);
+      }
     }
   }
 
